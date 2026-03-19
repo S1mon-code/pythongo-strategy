@@ -1,0 +1,101 @@
+"""
+Strategy #4: Dual Thrust Breakout (15-min bars)
+
+Classic Dual Thrust applied to iron ore futures.
+Computes an asymmetric range channel from the previous N trading days,
+then triggers long/short when price breaks above/below the channel
+relative to today's open.  One trade per day maximum.
+
+Params (3): lookback, k1, k2 — kept coarse for anti-overfitting.
+"""
+
+import numpy as np
+import pandas as pd
+from .base_strategy import BaseResearchStrategy
+from ..backtest_engine import PositionParams
+
+
+class DualThrustBreakout(BaseResearchStrategy):
+    name = "Dual Thrust Breakout"
+    freq = "15min"
+
+    def param_grid(self) -> dict:
+        return {
+            "lookback": [3, 5, 7, 10],
+            "k1": [0.4, 0.5, 0.6, 0.7],
+            "k2": [0.3, 0.4, 0.5, 0.6],
+        }
+
+    def generate_signals(
+        self, df: pd.DataFrame, lookback: int = 5, k1: float = 0.5, k2: float = 0.4
+    ) -> np.ndarray:
+        signals = np.zeros(len(df), dtype=np.int8)
+
+        # --- Derive tday if missing -------------------------------------------
+        if "tday" in df.columns:
+            tday = df["tday"].values
+        else:
+            tday = pd.Series(df.index.date, index=df.index).values
+
+        close = df["close"].values
+        high = df["high"].values
+        low = df["low"].values
+        open_ = df["open"].values
+
+        unique_days = pd.unique(tday)
+
+        # --- Pre-compute daily OHLC summaries ---------------------------------
+        day_high = {}   # tday -> highest high
+        day_low = {}    # tday -> lowest low
+        day_hc = {}     # tday -> highest close
+        day_lc = {}     # tday -> lowest close
+        day_open = {}   # tday -> first open price
+
+        for d in unique_days:
+            mask = tday == d
+            idx = np.where(mask)[0]
+            day_high[d] = np.nanmax(high[idx])
+            day_low[d] = np.nanmin(low[idx])
+            day_hc[d] = np.nanmax(close[idx])
+            day_lc[d] = np.nanmin(close[idx])
+            day_open[d] = open_[idx[0]]
+
+        # --- Generate signals day by day --------------------------------------
+        for i, d in enumerate(unique_days):
+            if i < lookback:
+                continue  # not enough history
+
+            # Previous N days' stats
+            prev_days = unique_days[i - lookback : i]
+            hh = max(day_high[dd] for dd in prev_days)
+            ll = min(day_low[dd] for dd in prev_days)
+            hc = max(day_hc[dd] for dd in prev_days)
+            lc = min(day_lc[dd] for dd in prev_days)
+
+            range_val = max(hh - lc, hc - ll)
+            today_open = day_open[d]
+
+            upper = today_open + k1 * range_val
+            lower = today_open - k2 * range_val
+
+            # Indices belonging to today
+            day_idx = np.where(tday == d)[0]
+            triggered = False
+
+            for j in day_idx:
+                if triggered:
+                    break
+                c = close[j]
+                if np.isnan(c):
+                    continue
+                if c > upper:
+                    signals[j] = 1
+                    triggered = True
+                elif c < lower:
+                    signals[j] = -1
+                    triggered = True
+
+        return signals
+
+    def position_params(self) -> PositionParams:
+        return PositionParams(hard_stop_pct=1.5, trailing_pct=1.0, tp1_pct=1.0, tp2_pct=2.5, max_lots=3)
