@@ -1,12 +1,36 @@
 """
-Strategy #4: Dual Thrust Breakout (15-min bars)
+Strategy #4 — Dual Thrust Breakout (15-min bars)
+================================================================================
 
-Classic Dual Thrust applied to iron ore futures.
-Computes an asymmetric range channel from the previous N trading days,
-then triggers long/short when price breaks above/below the channel
-relative to today's open.  One trade per day maximum.
+【策略思路】
+  核心逻辑: 前日区间突破，不对称阈值（经典Dual Thrust策略）
 
-Params (3): lookback, k1, k2 — kept coarse for anti-overfitting.
+  Dual Thrust是经典的日内突破策略。用过去N个交易日的最高价、最低价、
+  最高收盘价、最低收盘价计算区间宽度，然后以今日开盘价为锚点，
+  向上/向下设置不对称的突破触发线。价格突破即入场。
+
+  信号生成:
+  - HH = lookback日最高价, LL = lookback日最低价
+  - HC = lookback日最高收盘价, LC = lookback日最低收盘价
+  - range = max(HH - LC, HC - LL)
+  - 上轨 = 今日开盘价 + k1 × range
+  - 下轨 = 今日开盘价 - k2 × range (k1≠k2 实现不对称)
+  - 做多: 收盘价突破上轨
+  - 做空: 收盘价跌破下轨
+  - 每日仅触发一次
+
+  参数设计 (3个):
+  - lookback: 回看天数 [3,5,7,10]
+  - k1: 上轨乘数 [0.4,0.5,0.6,0.7] — 做多灵敏度
+  - k2: 下轨乘数 [0.3,0.4,0.5,0.6] — 做空灵敏度
+
+  适用环境: 趋势行情、波动扩大期
+  风险提示: 2023年后铁矿石转为震荡市，突破策略表现显著下降
+
+  回测表现:
+  - 训练集 (2013-2022, 无止损): Sharpe 0.92 | PF 1.74 | 544笔交易
+  - 测试集 (2023-2026): Sharpe -0.23 — 趋势市→震荡市转换后失效
+================================================================================
 """
 
 import numpy as np

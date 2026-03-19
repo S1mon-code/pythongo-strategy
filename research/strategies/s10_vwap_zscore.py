@@ -1,11 +1,41 @@
 """
-Strategy #10 — VWAP Z-Score Reversion (5-min bars)
+Strategy #10 — VWAP Z-Score Reversion (5-min bars) ⭐ WINNER #2
+================================================================================
 
-Iron ore futures mean-reversion strategy based on deviation from
-intraday VWAP.  When price drifts too far from VWAP (measured by a
-rolling Z-score of the deviation), bet on reversion back toward VWAP.
+【策略思路】
+  核心逻辑: 价格偏离VWAP的Z-Score → 均值回归
 
-Params (2): z_threshold, min_bars — kept coarse for anti-overfitting.
+  VWAP (成交量加权平均价) 是日内的"公允价格"。当价格显著偏离VWAP
+  时，意味着市场短期过度反应。用Z-Score标准化偏离程度: Z>3表示价格
+  高于VWAP超过3个标准差，统计上极不可能持续，回归概率大。
+
+  VWAP计算 (每日重置):
+  - typical_price = (high + low + close) / 3
+  - VWAP = cumsum(typical_price × volume) / cumsum(volume)
+
+  Z-Score计算:
+  - deviation = close - VWAP
+  - rolling_std = std(deviation, min_bars)
+  - Z = deviation / rolling_std
+
+  信号生成:
+  - 做多: Z < -z_threshold (价格远低于VWAP，期待回归上行)
+  - 做空: Z > z_threshold (价格远高于VWAP，期待回归下行)
+  - 出场: Z回到0附近 (回归完成) 或 硬止损5%
+  - 最少等 min_bars 根K线后才开始交易 (确保VWAP有意义)
+
+  参数设计 (2个):
+  - z_threshold: Z-Score阈值 [1.5,2.0,2.5,3.0] — 偏离灵敏度
+  - min_bars: 最少K线数 [10,20,30,50] — VWAP预热期
+
+  适用环境: 日内有明确价值中枢的震荡行情
+  风险提示: 趋势市中VWAP持续偏离，Z-Score可能长期处于极端
+
+  回测表现:
+  - 测试集 (2023-2026): Sharpe 0.65 | 年化 1.03% | 最大回撤 2.12%
+  - 逐年: -0.41%, +1.98%, +1.49%, +0.10% — 3/4年正收益
+  - PythonGo: strategies/composite/VwapZscoreReversion_PythonGo.py
+================================================================================
 """
 
 import numpy as np

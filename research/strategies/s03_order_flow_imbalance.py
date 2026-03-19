@@ -1,9 +1,31 @@
 """
-Strategy #3: Order Flow Imbalance (3-min bars)
+Strategy #3 — Order Flow Imbalance (3-min bars)
+================================================================================
 
-Idea: When open interest increases significantly alongside high volume,
-institutional players are building positions.  Follow their direction —
-bullish bar → long, bearish bar → short.
+【策略思路】
+  核心逻辑: 持仓量(OI)变化 + 量比 → 跟随主力方向
+
+  期货市场中，持仓量(OI)的显著增加意味着新资金入场建仓。当OI增幅
+  超过阈值，且成交量远超均量时，说明机构正在集中建仓。此时跟随K线
+  方向（阳线做多、阴线做空）即跟随主力资金方向。
+
+  信号生成:
+  - OI变化率 = oi.pct_change()
+  - 量比 = 当前成交量 / 20根K线均量
+  - 做多: OI增幅 > oi_threshold 且 量比 > vol_ratio 且 收阳 (close > open)
+  - 做空: OI增幅 > oi_threshold 且 量比 > vol_ratio 且 收阴 (close < open)
+
+  参数设计 (2个):
+  - oi_threshold: OI变化阈值 [0.005,0.01,0.02,0.03]
+  - vol_ratio: 量比阈值 [1.5,2.0,2.5,3.0]
+
+  适用环境: 主力建仓期、趋势启动前
+  风险提示: OI数据噪声大，信号极其稀少(仅75笔/9年)，不具统计可靠性
+
+  回测表现:
+  - 训练集 (无止损): Sharpe 1.05 | PF 3.25 — 但仅75笔交易
+  - 测试集: 仅1笔交易 — 信号过于稀少，不可用
+================================================================================
 """
 
 import numpy as np

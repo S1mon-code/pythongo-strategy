@@ -1,11 +1,34 @@
 """
 Strategy #9 — RSI Exhaustion Reversal (15-min bars)
+================================================================================
 
-Iron ore futures strategy that fades RSI extremes when price
-confirms via VWAP direction — exhausted selling near support
-(long) or exhausted buying near resistance (short).
+【策略思路】
+  核心逻辑: RSI超卖超买反转 + VWAP方向过滤
 
-Params (3): rsi_period, oversold, overbought — kept coarse for robustness.
+  RSI到达极端区域(超卖/超买)时，意味着短期价格运动已经"疲惫"，
+  反转概率增加。但单纯的RSI超卖不足以判断——可能是趋势中的正常
+  回调。加入VWAP方向过滤: RSI超卖+价格在VWAP上方=不是下跌趋势
+  中的超卖，而是暂时的过度反应，可以做多。
+
+  信号生成:
+  - RSI: EWM平滑(Wilder风格), 期间 rsi_period
+  - VWAP: 日内成交量加权平均价，每日重置
+  - 做多: RSI < oversold 且 close > VWAP (超卖但价格仍在均价上方)
+  - 做空: RSI > overbought 且 close < VWAP (超买但价格在均价下方)
+  - 冷却期: 信号后等待3根K线再产生下一个信号
+
+  参数设计 (3个):
+  - rsi_period: RSI周期 [10,14,20,30]
+  - oversold: 超卖阈值 [20,25,30]
+  - overbought: 超买阈值 [70,75,80]
+
+  适用环境: 震荡市中的超买超卖反转
+  风险提示: 交易频率低，VWAP过滤可能过于严格
+
+  回测表现:
+  - 训练集 (2013-2022, 无止损): Sharpe 0.51 | PF 1.71 | 147笔交易
+  - 测试集 (2023-2026): Sharpe -0.13 — 信号过少不稳定
+================================================================================
 """
 
 import numpy as np

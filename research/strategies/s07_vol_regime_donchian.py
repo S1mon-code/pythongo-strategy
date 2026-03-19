@@ -1,13 +1,39 @@
 """
 Strategy #7 — Vol Regime + Donchian Channel (15-min bars)
+================================================================================
 
-Iron ore futures strategy that adapts between trend-following and
-mean-reversion based on the current volatility regime.
+【策略思路】
+  核心逻辑: 波动率分区 + 唐奇安通道 (自适应策略)
 
-High vol → Donchian breakout (trend-following)
-Low vol  → Donchian reversion (fade the extremes)
+  市场在不同波动率环境下表现不同: 高波动率时趋势明确，适合突破策略；
+  低波动率时价格在区间内震荡，适合均值回归。本策略根据当前波动率
+  相对于长期波动率的比值来判断市场状态，自动切换逻辑。
 
-Params (2): donch_period, vol_ratio — kept coarse for anti-overfitting.
+  波动率判断:
+  - 短期波动率 = donch_period 根K线收益率标准差
+  - 长期波动率 = donch_period×4 根K线收益率标准差
+  - vol_regime = 短期 / 长期 (>1 高波动, <1 低波动)
+
+  唐奇安通道:
+  - 上轨 = donch_period 根K线最高价 (shift 1, 不含当前bar)
+  - 下轨 = donch_period 根K线最低价 (shift 1)
+
+  信号生成:
+  - 高波动 (vol_regime > vol_ratio): 趋势跟随
+    - 做多: 收盘价 > 上轨 | 做空: 收盘价 < 下轨
+  - 低波动 (vol_regime < 1/vol_ratio): 均值回归
+    - 做多: 收盘价 < 下轨 (买入) | 做空: 收盘价 > 上轨 (卖出)
+
+  参数设计 (2个):
+  - donch_period: 唐奇安周期 [20,30,50,80]
+  - vol_ratio: 波动率切换阈值 [0.8,1.0,1.2,1.5]
+
+  适用环境: 全天候（自适应切换）
+  风险提示: 波动率分区判断滞后，切换点附近信号混乱
+
+  回测表现:
+  - 训练集 (2013-2022, 无止损): Sharpe 0.60 | PF 1.27 | 1046笔交易
+  - 测试集 (2023-2026): Sharpe -0.40 — 切换逻辑在近期不稳定
 """
 
 import numpy as np

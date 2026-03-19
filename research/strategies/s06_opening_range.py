@@ -1,14 +1,34 @@
 """
-Strategy #6: Opening Range Breakout (5-min bars)
+Strategy #6 — Opening Range Breakout (5-min bars)
+================================================================================
 
-Idea: Identify the high/low of the first N minutes of the day session,
-then trade breakouts with volume confirmation.  DCE iron ore day session
-starts at 09:00.
+【策略思路】
+  核心逻辑: 开盘区间突破 + 成交量确认
 
-- opening_min controls how many minutes define the opening range.
-- vol_mult requires the breakout bar's volume to exceed the average
-  volume of the opening bars by this multiple.
-- Only one signal per direction per trading day.
+  开盘后一段时间的高低点形成的区间，代表了多空双方的初始博弈结果。
+  当价格带量突破这个区间时，意味着一方取得优势，趋势大概率延续。
+
+  DCE铁矿石日盘从09:00开盘。
+
+  信号生成:
+  - 开盘区间: 日盘前 opening_min 分钟的最高价和最低价
+  - 对于5分钟K线: opening_min/5 根K线
+  - 量能确认: 突破bar成交量 > vol_mult × 开盘区间均量
+  - 做多: 收盘价突破区间上沿 且 放量确认
+  - 做空: 收盘价跌破区间下沿 且 放量确认
+  - 每日每个方向仅一次信号
+
+  参数设计 (2个):
+  - opening_min: 开盘区间时长 [15,30,45,60] — 3到12根5分钟K线
+  - vol_mult: 量能乘数 [1.2,1.5,2.0,2.5] — 放量确认阈值
+
+  适用环境: 有隔夜消息驱动的方向性行情
+  风险提示: 假突破频繁，尤其在无重大消息的交易日
+
+  回测表现:
+  - 训练集 (2013-2022, 无止损): Sharpe 0.65 | PF 1.44 | 664笔交易
+  - 测试集 (2023-2026): Sharpe -0.86 — 假突破侵蚀严重
+================================================================================
 """
 
 import numpy as np

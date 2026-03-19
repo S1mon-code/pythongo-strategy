@@ -28,11 +28,12 @@
 - [x] Yearly breakdown analysis
 - [x] Final report: research/results/FINAL_REPORT.md
 
-## Phase 4: PythonGo Conversion (in progress)
-- [ ] Micro Mean-Reversion → strategies/bollinger/
-- [ ] VWAP Z-Score Reversion → strategies/composite/
-- [ ] Session-Gap Reversion → strategies/composite/
+## Phase 4: PythonGo Conversion ✅
+- [x] Micro Mean-Reversion → strategies/bollinger/
+- [x] VWAP Z-Score Reversion → strategies/composite/
+- [x] Session-Gap Reversion → strategies/composite/
 
-## Phase 5: Final
-- [ ] Review all code
-- [ ] Commit + push
+## Phase 5: Final ✅
+- [x] Code review — no critical bugs, standardized position_side to str
+- [x] Added data/ to .gitignore
+- [x] Commit + push

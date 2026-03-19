@@ -1,11 +1,36 @@
 """
 Strategy #5 — KAMA + ATR Trend (15-min bars)
+================================================================================
 
-Iron ore futures trend-following strategy using Kaufman Adaptive
-Moving Average with ATR-based bands.  Entries trigger on breakouts
-above/below the adaptive channel.
+【策略思路】
+  核心逻辑: 自适应均线(KAMA) + ATR波动率通道突破
 
-Params (2): kama_period, atr_mult — kept coarse for anti-overfitting.
+  KAMA (Kaufman Adaptive Moving Average) 通过效率比(ER)自动调节平滑
+  系数：趋势明确时跟踪速度快，横盘时跟踪速度慢。在KAMA基础上加减
+  ATR倍数构成动态通道，价格突破通道即入场。
+
+  KAMA计算:
+  - ER = |close - close[n]| / sum(|close[i] - close[i-1]|, n) — 效率比
+  - SC = (ER × (fast_sc - slow_sc) + slow_sc)² — 平滑常数
+  - KAMA[i] = KAMA[i-1] + SC × (close[i] - KAMA[i-1])
+
+  信号生成:
+  - 上轨 = KAMA + atr_mult × ATR(kama_period)
+  - 下轨 = KAMA - atr_mult × ATR(kama_period)
+  - 做多: 收盘价上穿上轨 (趋势确认突破)
+  - 做空: 收盘价下穿下轨
+
+  参数设计 (2个):
+  - kama_period: KAMA周期 [10,15,20,30] — 自适应窗口大小
+  - atr_mult: ATR乘数 [1.5,2.0,2.5,3.0] — 通道宽度
+
+  适用环境: 趋势行情，尤其是波动率从低到高扩张阶段
+  风险提示: 震荡市中KAMA频繁调整方向导致信号质量下降
+
+  回测表现:
+  - 训练集 (2013-2022, 无止损): Sharpe 0.87 | PF 1.45 | 1092笔交易
+  - 测试集 (2023-2026): Sharpe -0.12 — 震荡市中失效
+================================================================================
 """
 
 import numpy as np

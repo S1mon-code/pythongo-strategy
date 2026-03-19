@@ -84,7 +84,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
 
         # -- 持仓状态 ----------------------------------------------------------
         self.in_position: bool = False
-        self.position_side: int = 0       # +1 = long, -1 = short, 0 = flat
+        self.position_side: str = ""       # "long", "short", "" = flat
         self.entry_price: float = 0.0
 
         # -- 前一根 bar 的收盘价与布林带值 (用于判断穿越) -----------------------
@@ -198,7 +198,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
         self.state_map.bb_lower = round(lower, 2)
 
         # -- 4/5. 信号生成 (优先级: 止损 > 反向出场 > 入场) --------------------
-        if self.in_position and self.position_side == 1:
+        if self.in_position and self.position_side == "long":
             # 持多仓
             if self.entry_price > 0 and current_close <= self.entry_price * (1 - self.params_map.hard_stop_pct / 100):
                 self._pending = "STOP_LONG"
@@ -208,7 +208,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
             else:
                 self.state_map.last_action = "HOLD_LONG"
 
-        elif self.in_position and self.position_side == -1:
+        elif self.in_position and self.position_side == "short":
             # 持空仓
             if self.entry_price > 0 and current_close >= self.entry_price * (1 + self.params_map.hard_stop_pct / 100):
                 self._pending = "STOP_SHORT"
@@ -284,7 +284,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
             self.order_id.add(order_id)
 
         self.in_position = True
-        self.position_side = 1
+        self.position_side = "long"
         self.entry_price = price
 
         self.state_map.entry_price = price
@@ -307,7 +307,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
             self.order_id.add(order_id)
 
         self.in_position = True
-        self.position_side = -1
+        self.position_side = "short"
         self.entry_price = price
 
         self.state_map.entry_price = price
@@ -323,7 +323,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
 
         if net_pos <= 0:
             self.in_position = False
-            self.position_side = 0
+            self.position_side = ""
             return 0.0
 
         order_id = self.auto_close_position(
@@ -358,7 +358,7 @@ class MicroMeanReversion_PythonGo(BaseStrategy):
 
         if net_pos >= 0:
             self.in_position = False
-            self.position_side = 0
+            self.position_side = ""
             return 0.0
 
         close_vol = abs(net_pos)
