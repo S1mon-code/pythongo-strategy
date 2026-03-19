@@ -28,7 +28,7 @@ pythongo-strategy/
     └── composite/             # 复合策略 (多指标组合)
 ```
 
-New category folders can be added as needed.
+When Simon provides a strategy idea, automatically classify it into the appropriate category. If no matching folder exists, create one.
 
 ## Strategy Template Rules
 
