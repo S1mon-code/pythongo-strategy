@@ -2,6 +2,10 @@
 
 This project is a **strategy library** for the 无限易 PythonGo platform. We do NOT run code here — only develop, organize, and version strategies.
 
+- Simon provides ideas → I convert them to strategy code following the template below
+- Strategies categorized into subfolders (expandable as needed)
+- Reference files: `Test_DualMA.py` and `Test_OpenOnly.py` are proven working templates
+
 ## Platform
 
 - **Framework**: 无限易 PythonGo (`BaseStrategy`)
