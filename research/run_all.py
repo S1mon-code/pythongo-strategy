@@ -32,6 +32,34 @@ from research.strategies.s07_vol_regime_donchian import VolRegimeDonchian
 from research.strategies.s08_session_gap import SessionGapReversion
 from research.strategies.s09_rsi_exhaustion import RsiExhaustionReversal
 from research.strategies.s10_vwap_zscore import VwapZscoreReversion
+from research.strategies.s11_candle_pattern_trend import CandlePatternTrend
+from research.strategies.s12_night_day_gap import NightDayGapZScore
+from research.strategies.s13_semivariance_bb import SemivarianceBB
+from research.strategies.s14_open_reversion import OpenReversionStrategy
+from research.strategies.s15_variance_ratio import VarianceRatioReversion
+from research.strategies.s16_kalman_reversion import KalmanMeanReversion
+from research.strategies.s17_session_half import SessionHalfReversion
+from research.strategies.s18_hurst_bb import HurstBBReversion
+from research.strategies.s19_vwap_band import VwapBandReversion
+from research.strategies.s20_atr_expansion_fade import AtrExpansionFade
+from research.strategies.s21_linear_reg_channel import LinearRegChannelReversion
+from research.strategies.s22_stochastic import StochasticReversion
+from research.strategies.s23_ema_envelope import EmaEnvelopeReversion
+from research.strategies.s24_bb_candle import BBCandleReversion
+from research.strategies.s25_vwap_semivariance import VwapSemivarianceReversion
+from research.strategies.s26_channel_volume import ChannelVolumeReversion
+from research.strategies.s27_rsi_channel import RsiChannelReversion
+from research.strategies.s28_consec_bar import ConsecBarExhaustion
+from research.strategies.s29_price_oscillator import PriceOscillatorReversion
+from research.strategies.s30_channel_barclose import ChannelBarCloseReversion
+from research.strategies.s31_rsi_channel_v2 import RsiChannelReversionV2
+from research.strategies.s32_ema_squeeze import EmaSqueezeReversion
+from research.strategies.s33_first_reversal_bar import FirstReversalBar
+from research.strategies.s34_rsi_divergence import RsiDivergenceReversion
+from research.strategies.s35_micro_breakout import MicroBreakoutReversal
+from research.strategies.s36_large_body_reversal import LargeBodyReversal
+from research.strategies.s37_intrabar_reversal import IntrabarReversal
+from research.strategies.s38_return_decel import ReturnDecelReversion
 
 ALL_STRATEGIES = [
     TickMomentumScalper(),
@@ -44,6 +72,34 @@ ALL_STRATEGIES = [
     SessionGapReversion(),
     RsiExhaustionReversal(),
     VwapZscoreReversion(),
+    CandlePatternTrend(),
+    NightDayGapZScore(),
+    SemivarianceBB(),
+    OpenReversionStrategy(),
+    VarianceRatioReversion(),
+    KalmanMeanReversion(),
+    SessionHalfReversion(),
+    HurstBBReversion(),
+    VwapBandReversion(),
+    AtrExpansionFade(),
+    LinearRegChannelReversion(),
+    StochasticReversion(),
+    EmaEnvelopeReversion(),
+    BBCandleReversion(),
+    VwapSemivarianceReversion(),
+    ChannelVolumeReversion(),
+    RsiChannelReversion(),
+    ConsecBarExhaustion(),
+    PriceOscillatorReversion(),
+    ChannelBarCloseReversion(),
+    RsiChannelReversionV2(),
+    EmaSqueezeReversion(),
+    FirstReversalBar(),
+    RsiDivergenceReversion(),
+    MicroBreakoutReversal(),
+    LargeBodyReversal(),
+    IntrabarReversal(),
+    ReturnDecelReversion(),
 ]
 
 
